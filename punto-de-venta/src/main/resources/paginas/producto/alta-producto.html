@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+<head th:replace="~{plantillas/plantilla :: head}"></head>
+<body>
+<header th:replace="~{plantillas/plantilla :: header}"></header>
+<main class="container text-center p-3 mb-5 bg-body-tertiary rounded">
+    <!-- Alta de Producto -->
+    <h1 class="card-header"><strong><p th:text="${accion}"></p></strong></h1>
+    <div class="card-body">
+        <div id="errorContainer" class="alert alert-danger d-none" role="alert">
+            <ul id="errorMessages"></ul>
+        </div>
+
+        <h1 class="modal-title fs-5">Información del Producto: </h1>
+        <hr>
+        <form id="formProducto" class="text-start" th:action="@{/producto/salvar-producto}" method="post">
+            <div class="d-flex align-items-center flex-column mb-3 gx-5">
+                <!-- Primer renglón: Código y Nombre -->
+                <div class="row mb-3 w-100 justify-content-center">
+                    <div class="col-md-5">
+                        <div class="form-group">
+                            <label for="codigo" class="form-label float-start"><i class="fas fa-barcode"></i> Código</label>
+                            <input type="text" class="form-control" id="codigo" name="codigo" placeholder="Código de barras" required
+                                   th:value="${producto.codigo}">
+                        </div>
+                    </div>
+                    <div class="col-md-5">
+                        <div class="form-group">
+                            <label for="nombre" class="form-label float-start">Nombre</label>
+                            <input type="text" class="form-control" id="nombre" name="nombre" placeholder="Nombre del producto" required
+                                   th:value="${producto.nombre}">
+                        </div>
+                    </div>
+                </div>
+                <!-- Segundo renglón: Stock y Precio Compra -->
+                <div class="row mb-3 w-100 justify-content-center">
+                    <div class="col-md-5">
+                        <div class="form-group">
+                            <label for="stock" class="form-label float-start">Stock:</label>
+                            <input type="number" class="form-control" id="stock" name="stock" placeholder="Cantidad de stock" required
+                                   th:value="${producto.stock}">
+                        </div>
+                    </div>
+                    <div class="col-md-5">
+                        <div class="form-group">
+                            <label for="costoCompra" class="form-label">Costo de Compra</label>
+                            <input type="text" class="form-control" id="costoCompra" name="costoCompra" placeholder="Precio de compra por unidad" required
+                                   th:value="${producto.costoCompra}">
+                        </div>
+                    </div>
+                </div>
+                <!-- Tercer renglón: Precio Venta y Categoria -->
+                <div class="row mb-3 w-100 justify-content-center">
+                    <div class="col-md-5">
+                        <div class="form-group">
+                            <label for="precioVenta" class="form-label float-start">Precio de Venta: </label>
+                            <input type="number" step="0.01" class="form-control" id="precioVenta" name="precioVenta" placeholder="Precio de venta por unidad" required
+                                   th:value="${producto.precioVenta}">
+                        </div>
+                    </div>
+                    <div class="col-md-5">
+                        <div class="form-group">
+                            <label for="categoria" class="form-label float-start">Categoría: </label>
+                            <select id="categoria" name="categoria" class="form-select" required>
+                                <option value="" th:text="'Seleccionar Categoría'" th:selected="${producto.categoria == null}"></option>
+                                <option th:each="cat : ${categorias}"
+                                        th:value="${cat.nombreCategoria}"
+                                        th:text="${cat.nombreCategoria}"
+                                        th:selected="${producto.categoria != null && producto.categoria == cat.nombreCategoria}">
+                                </option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <!-- Botón Guardar centrado -->
+                <div class="row w-100 justify-content-center">
+                    <div class="col-md-2">
+                        <button type="submit" class="btn btn-primary w-100"><i class="far fa-plus-square"></i> Guardar</button>
+                    </div>
+                </div>
+            </div>
+        </form>
+        <div id="alerta" class="alert d-none mt-3" role="alert"></div>
+    </div>
+</main>
+<footer th:replace="~{plantillas/plantilla :: footer}"></footer>
+<script>
+    document.addEventListener('DOMContentLoaded', async () => {
+        // Cargar categorías al inicio
+        const selectCategoria = document.getElementById('categoria');
+        try {
+            const response = await fetch('/api/producto/categorias');
+            const categorias = await response.json();
+            categorias.forEach(cat => {
+                const option = document.createElement('option');
+                option.value = cat.nombreCategoria;
+                option.textContent = cat.nombreCategoria;
+                selectCategoria.appendChild(option);
+            });
+        } catch (error) {
+            console.error('Error al cargar categorías:', error);
+        }
+    });
+</script>
+<script>
+    document.getElementById('formProducto').addEventListener('submit', async function (e) {
+        e.preventDefault(); // Prevenir el envío estándar del formulario
+        const form = e.target;
+        const formData = new FormData(form);
+
+        try {
+            const response = await fetch(form.action, {
+                method: form.method,
+                body: new URLSearchParams(formData),
+                headers: {
+                    'Accept': 'application/json',
+                },
+            });
+
+            if (!response.ok) {
+                // Si la respuesta no es exitosa, manejar el error
+                const errorData = await response.json();
+                mostrarErrores(errorData);
+            } else {
+                // Redirigir en caso de éxito
+                window.location.href = '/producto/lista-producto';
+            }
+        } catch (error) {
+            console.error('Error al enviar el formulario:', error);
+            mostrarErrores({
+                mensaje: 'Error inesperado. Intenta nuevamente más tarde.',
+                detalle: error.message,
+            });
+        }
+    });
+
+    function mostrarErrores(errorData) {
+        const errorContainer = document.getElementById('errorContainer');
+        const errorMessages = document.getElementById('errorMessages');
+
+        // Limpiar mensajes previos
+        errorMessages.innerHTML = '';
+
+        // Mostrar mensajes del backend o un mensaje general
+        if (errorData.mensaje) {
+            const li = document.createElement('li');
+            li.textContent = errorData.mensaje;
+            errorMessages.appendChild(li);
+        }
+
+        if (errorData.errores) {
+            // Manejar errores de validación específicos
+            for (const [campo, mensaje] of Object.entries(errorData.errores)) {
+                const li = document.createElement('li');
+                li.textContent = `${campo}: ${mensaje}`;
+                errorMessages.appendChild(li);
+            }
+        }
+
+        errorContainer.classList.remove('d-none'); // Mostrar el contenedor de errores
+    }
+
+});
+
+</script>
+
+</body>
+</html>

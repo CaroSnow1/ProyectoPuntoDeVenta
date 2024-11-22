@@ -1,0 +1,47 @@
+<!-- Modal Cancelar Producto -->
+<div th:fragment="modalCancelarProducto">
+    <div class="modal fade" id="modalCancelarProducto" tabindex="-1" aria-labelledby="modalCancelarProductoLabel"
+         aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalCancelarProductoLabel">Cancelar Producto</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="formCancelarProducto">
+                        <!-- Campo para ingresar el código del producto -->
+                        <div class="mb-4">
+                            <label for="codigoProducto" class="form-label"><i class="fas fa-barcode"></i> Código del Producto:</label>
+                            <input type="text" class="form-control" id="codigoProducto" name="codigoProducto"
+                                   placeholder="Ingrese el código del producto" required>
+                        </div>
+
+                        <div class="h4 pb-2 mb-4 text-center text-secondary border-bottom border-secondary border-opacity-25">
+                            <i class="fas fa-user-lock"></i> Autorización Gerente
+                        </div>
+
+                        <!-- Campo para ingresar el nombre del Gerente -->
+                        <div class="mb-3">
+                            <label for="nombreGerente" class="form-label">Usuario:</label>
+                            <input type="text" class="form-control" id="nombreGerente" name="nombreGerente"
+                                   placeholder="Ingrese el nombre del gerente" required>
+                        </div>
+
+                        <!-- Campo para ingresar la contraseña del Gerente -->
+                        <div class="mb-3">
+                            <label for="passwordGerente" class="form-label">Contraseña:</label>
+                            <input type="password" class="form-control" id="passwordGerente" name="passwordGerente"
+                                   placeholder="Ingrese la contraseña del gerente" required>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary" onclick="autorizarCancelarProducto()">Autorizar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
